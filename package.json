@@ -2,10 +2,10 @@
   "name": "devtinder",
   "version": "1.0.0",
   "description": "This is the backend for devTinder",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
   },
   "author": "unikdahal03",
   "license": "ISC",
