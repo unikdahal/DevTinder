@@ -16,12 +16,10 @@ requestRouter.post("/send/:toUserId", userAuth, async (req, res) => {
         const fromUserId = req.user._id;
         const toUserId = req.params.toUserId;
 
-        const toUser = User.findById(toUserId);
+        const toUser = await User.findById(toUserId);
         if (!toUser) {
             return res.status(404).json({message: "User not found"});
         }
-
-
         const existingRequest = await ConnectionRequest.findOne({
             $or: [{fromUserId, toUserId}, {fromUserId: toUserId, toUserId: fromUserId}]
         });
@@ -50,9 +48,10 @@ requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, r
             return res.status(400).json({message: "Invalid status"});
         }
 
-        const connectionRequest = await ConnectionRequest.find({
+        //populate the user id from the connection request so that the user can review the request based on user details
+        const connectionRequest = await ConnectionRequest.findOne({
             _id: requestId, toUserId: user._id, status: "interested"
-        });
+        }).populate("fromUserId", ["firstName", "lastName", "photoURL"]);
         if (!connectionRequest) {
             return res.status(404).json({message: "Request not found"});
         }
@@ -60,13 +59,14 @@ requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, r
         connectionRequest.status = status;
         const data = await connectionRequest.save();
 
-        res.status(200).json("Connection request reviewed successfully " + data);
-
+        res.status(200).json({message: "Connection request reviewed successfully", data});
 
     } catch (error) {
         res.status(500).json({message: error.message})
     }
 })
+
+
 
 
 module.exports = requestRouter;

@@ -2,9 +2,9 @@ const mongoose = require("mongoose")
 
 const connectionRequestSchema = new mongoose.Schema({
     fromUserId: {
-        type: mongoose.Schema.Types.ObjectId, require: true,
+        type: mongoose.Schema.Types.ObjectId, ref: "User", require: true,
     }, toUserId: {
-        type: mongoose.Schema.Types.ObjectId, require: true,
+        type: mongoose.Schema.Types.ObjectId, ref: "User", require: true,
     }, status: {
         type: Enumerator, enum: {
             values: ["ignore", "interested", "accepted", "rejected"], error: "{VALUE} is not supported"
@@ -14,7 +14,7 @@ const connectionRequestSchema = new mongoose.Schema({
     timestamps: true
 })
 
-connectionRequestSchema.pre("save", async function (next) {
+connectionRequestSchema.pre("save", async function () {
     const request = this;
     if (request.toUserId.equals(request.fromUserId)) {
         throw new Error("You cannot send request to yourself")
