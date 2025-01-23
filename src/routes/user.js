@@ -55,6 +55,10 @@ userRouter.get("/feed", userAuth, async (req, res) => {
         //     - people to whom he has sent a request
 
         const user = req.user;
+        const page = parseInt(req.query.page) || 1;
+        let limit = parseInt(req.query.limit) || 10;
+        limit = limit > 50 ? 50 : limit;
+        const skip = (page - 1) * limit;
         //if there is entry of user on connection request table, then all the other people card shouldn't be seen
         const connectionRequests = await ConnectionRequests.find({
             $or: [{fromUserId: user._id}, {toUserId: user._id}]
@@ -68,7 +72,9 @@ userRouter.get("/feed", userAuth, async (req, res) => {
 
         const users = await User.find({
             _id: {$nin: [user._id, ...hiddenUserFromFeeds]}
-        }).select("firstName lastName photoURL gender");
+        }).select("firstName lastName photoURL gender")
+            .skip(skip)
+            .limit(limit);
 
         res.status(200).json(users);
 
