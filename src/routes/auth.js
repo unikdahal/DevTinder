@@ -9,14 +9,15 @@ const validator = require("validator");
 authRouter.post("/signup", async (req, res) => {
     try {
         validateSignUpData(req);
-        const { firstName, lastName, email, password, age } = req.body;
+        const {firstName, lastName, email, password, age, gender, about} = req.body;
         const passwordHash = await bcrypt.hash(password, 10);
         const user = new User({
             firstName: firstName.trim(),
             lastName: lastName.trim(),
             email: email.trim(),
             password: passwordHash,
-            age
+            age,
+            gender,
         });
         const savedUser = await user.save();
         const token = await savedUser.generateAuthToken();
