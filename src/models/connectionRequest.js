@@ -6,7 +6,7 @@ const connectionRequestSchema = new mongoose.Schema({
     }, toUserId: {
         type: mongoose.Schema.Types.ObjectId, ref: "User", require: true,
     }, status: {
-        type: Enumerator, enum: {
+        type: String, enum: {
             values: ["ignore", "interested", "accepted", "rejected"], error: "{VALUE} is not supported"
         }, default: "interested"
     }
