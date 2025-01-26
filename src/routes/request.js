@@ -36,7 +36,7 @@ requestRouter.post("/send/:toUserId", userAuth, async (req, res) => {
     }
 });
 
-requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, res) => {
+requestRouter.post("/review/:status/:requestId", userAuth, async (req, res) => {
     try {
         const user = req.user;
         const requestId = req.params.requestId;
@@ -50,8 +50,8 @@ requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, r
 
         //populate the user id from the connection request so that the user can review the request based on user details
         const connectionRequest = await ConnectionRequest.findOne({
-            _id: requestId, toUserId: user._id, status: "interested"
-        }).populate("fromUserId", ["firstName", "lastName", "photoURL"]);
+            fromUserId: requestId, toUserId: user._id, status: "interested"
+        }).populate("fromUserId", "firstName lastName photoURL");
         if (!connectionRequest) {
             return res.status(404).json({message: "Request not found"});
         }
