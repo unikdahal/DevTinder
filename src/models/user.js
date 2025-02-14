@@ -15,15 +15,18 @@ const userSchema = new mongoose.Schema({
             }
         }
     }, password: {
-        type: String, required: true,
+        type: String, required: function() { return !this.isGoogleUser; },
+    }, googleId: {
+        type: String,
+        sparse: true,
+        unique: true
+    }, isGoogleUser: {
+        type: Boolean,
+        default: false
     }, age: {
-        type: Number, required: true, validator(value) {
-            if (!validator.isStrongPassword(value)) {
-                throw new Error("Password is not strong enough");
-            }
-        },
+        type: Number
     }, gender: {
-        type: String, required: true, validator(value) {
+        type: String, validator(value) {
             if (!["MALE", "FEMALE", "OTHER"].includes(value.toUpperCase())) {
                 throw new Error("Gender is not valid");
             }

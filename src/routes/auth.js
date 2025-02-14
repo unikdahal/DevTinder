@@ -4,6 +4,8 @@ const {validateSignUpData} = require("../utils/validation");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const validator = require("validator");
+const passport = require("passport");
+require("../config/passport");
 
 // Sign up route
 authRouter.post("/signup", async (req, res) => {
@@ -56,9 +58,14 @@ authRouter.post("/login", async (req, res) => {
         const token = await user.generateAuthToken();
         res.cookie("token", token, {
             expires: new Date(Date.now() + 604800000),
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/'
         });
         res.status(200).json(user);
     } catch (error) {
+        console.error('Login Error:', error);
         res.status(500).json({ message: error.message });
     }
 });
@@ -72,5 +79,35 @@ authRouter.post("/logout", async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+
+// Google OAuth routes
+authRouter.get('/google/login',
+    passport.authenticate('google', { 
+        scope: ['profile', 'email']
+    })
+);
+
+authRouter.get('/google/callback',
+    passport.authenticate('google', { 
+        failureRedirect: '/login',
+        session: false
+    }),
+    async (req, res) => {
+        try {
+            const token = await req.user.generateAuthToken();
+            res.cookie("token", token, {
+                expires: new Date(Date.now() + 604800000),
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                path: '/'
+            });
+            res.redirect('http://localhost:5173/feed');
+        } catch (error) {
+            console.error('Google Auth Callback Error:', error);
+            res.status(500).json({ message: error.message });
+        }
+    }
+);
 
 module.exports = authRouter;

@@ -8,7 +8,7 @@ const userAuth = async (req, res, next) => {
             return res.status(401).json({ error: "You are not authenticated" });
         }
 
-        const decodedObj = await jwt.verify(token, "UNIK");
+        const decodedObj = await jwt.verify(token, process.env.JWT_SECRET);
         const { _id } = decodedObj;
         const user = await User.findById(_id);
         if (!user) {
@@ -18,6 +18,7 @@ const userAuth = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
+        console.error('Auth Error:', error);
         res.status(401).json({ error: "You are not authenticated" });
     }
 };
